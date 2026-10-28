@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quiz</title>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--text:#1f1d1a;--muted:#6b665e;--accent:#d9622b;--ok:#2e8b57;--bad:#c0392b;--line:#e3ded4;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1b1a18;--card:#262421;--text:#f1ede6;--muted:#a49e93;--accent:#f08a50;--ok:#4cc58a;--bad:#ef6a5b;--line:#3a3732}}
+:root[data-theme="dark"]{--bg:#1b1a18;--card:#262421;--text:#f1ede6;--muted:#a49e93;--accent:#f08a50;--ok:#4cc58a;--bad:#ef6a5b;--line:#3a3732}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh;display:flex;justify-content:center;padding:20px 16px}
+.wrap{width:100%;max-width:480px}
+h1{font-size:1.4rem;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 18px;font-size:.95rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
+.bar{height:6px;background:var(--line);border-radius:3px;margin-bottom:16px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.q{font-size:1.15rem;font-weight:600;margin:0 0 16px;line-height:1.4}
+.opt{display:block;width:100%;text-align:left;padding:14px;margin-bottom:10px;border:1.5px solid var(--line);border-radius:12px;background:transparent;color:var(--text);font-size:1rem;cursor:pointer}
+.opt.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 18%,transparent)}
+.opt.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 18%,transparent)}
+.btn{width:100%;padding:14px;border:0;border-radius:12px;background:var(--accent);color:#fff;font-size:1rem;font-weight:600;cursor:pointer;margin-top:6px}
+.meta{display:flex;justify-content:space-between;color:var(--muted);font-size:.85rem;margin-bottom:8px}
+.score{font-size:3rem;font-weight:700;text-align:center;margin:10px 0}
+.center{text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🧠 Quick Quiz</h1>
+  <p class="sub">Answer pannunga, score paarunga!</p>
+  <div class="card" id="app"></div>
+</div>
+<script>
+// ✏️ Inga unga questions maathikonga. answer = correct option index (0 la irundhu start)
+const QUESTIONS = [
+  {q:"India-oda capital enna?", options:["Mumbai","New Delhi","Chennai","Kolkata"], answer:1},
+  {q:"Oru week-la ethana naal?", options:["5","6","7","8"], answer:2},
+  {q:"HTML-oda full form?", options:["HyperText Markup Language","High Tech Modern Language","Home Tool Markup Language","Hyperlink Text Mode Language"], answer:0},
+  {q:"Sooriyan eppadi udhikkum?", options:["Merku","Kizhakku","Vadakku","Therku"], answer:1},
+  {q:"CSS edhukku use aagum?", options:["Database","Styling","Networking","Testing"], answer:1}
+];
+let i=0, score=0, locked=false;
+const app=document.getElementById('app');
+
+function show(){
+  locked=false;
+  const d=QUESTIONS[i];
+  app.innerHTML=
+    '<div class="meta"><span>Question '+(i+1)+' / '+QUESTIONS.length+'</span><span>Score: '+score+'</span></div>'+
+    '<div class="bar"><i style="width:'+(i/QUESTIONS.length*100)+'%"></i></div>'+
+    '<p class="q"></p><div id="opts"></div><button class="btn" id="next" style="display:none"></button>';
+  app.querySelector('.q').textContent=d.q;
+  const box=document.getElementById('opts');
+  d.options.forEach(function(t,k){
+    const b=document.createElement('button');
+    b.className='opt'; b.textContent=t;
+    b.onclick=function(){pick(k,b)};
+    box.appendChild(b);
+  });
+}
+function pick(k,btn){
+  if(locked) return; locked=true;
+  const d=QUESTIONS[i], all=document.querySelectorAll('.opt');
+  if(k===d.answer){score++;btn.classList.add('ok');}
+  else{btn.classList.add('bad');all[d.answer].classList.add('ok');}
+  const n=document.getElementById('next');
+  n.style.display='block';
+  n.textContent=(i===QUESTIONS.length-1)?'Result paaru':'Next';
+  n.onclick=function(){i++; i<QUESTIONS.length?show():finish();};
+}
+function finish(){
+  const p=Math.round(score/QUESTIONS.length*100);
+  const msg=p===100?'Semma! Perfect 🔥':p>=60?'Nalla try 👍':'Innum konjam practice pannunga 💪';
+  app.innerHTML='<div class="center"><div class="meta" style="justify-content:center">Un score</div>'+
+    '<div class="score">'+score+' / '+QUESTIONS.length+'</div><p>'+msg+'</p>'+
+    '<button class="btn" id="again">Marubadiyum aadu</button></div>';
+  document.getElementById('again').onclick=function(){i=0;score=0;show();};
+}
+show();
+</script>
+</body>
+</html>
